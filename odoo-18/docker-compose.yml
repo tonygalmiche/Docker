@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - odoo_network
+    # restart: unless-stopped
+
+  odoo:
+    image: odoo:18
+    env_file: .env
+    depends_on:
+      - db
+    environment:
+      HOST: ${HOST}
+      USER: ${POSTGRES_USER}
+      PASSWORD: ${POSTGRES_PASSWORD}
+      ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
+    ports:
+      - "127.0.0.1:8269:8069" 
+      - "127.0.0.1:8270:8070" 
+      - "127.0.0.1:8271:8071" 
+      - "127.0.0.1:8272:8072" 
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./config:/etc/odoo
+    networks:
+      - odoo_network
+    #restart: unless-stopped
+
+volumes:
+  postgres_data:
+  odoo_data:
+
+networks:
+  odoo_network:
+    driver: bridge
+
+
+#- ./odoo_data:/var/lib/odoo # En partageant l volume avec l'hote, cela entrianes des prolbèmes de droits d'accès 
+                             # => Je refere donc le laisser dans le voulume du conteneur

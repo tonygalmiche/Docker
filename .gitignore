@@ -1,0 +1,9 @@
+# Dossiers à ignorer
+dokuwiki/
+gemini-api/
+addons
+addons/
+
+# Archives
+*.tgz
+*.gz

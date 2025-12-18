@@ -1,0 +1,59 @@
+services:
+  db:
+    image: postgres:11
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - odoo_network
+    # restart: unless-stopped
+
+  odoo:
+    image: odoo:13
+    env_file: .env
+    depends_on:
+      - db
+    # command: odoo -i base -d odoo-13
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ODOO_ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
+    # ports:
+    #   - "127.0.0.1:8569:8069" 
+    #   - "127.0.0.1:8570:8070" 
+    #   - "127.0.0.1:8571:8071" 
+    #   - "127.0.0.1:8572:8072" 
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./config/odoo.conf:/etc/odoo/odoo.conf
+    networks:
+      - odoo_network
+    # restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - odoo
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - odoo_network
+    # restart: unless-stopped
+
+volumes:
+  postgres_data:
+  odoo_data:
+
+networks:
+  odoo_network:
+    driver: bridge
+
