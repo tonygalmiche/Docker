@@ -23,7 +23,8 @@ services:
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
-    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     ports:
       - "127.0.0.1:8169:8069"  # Accès local uniquement
