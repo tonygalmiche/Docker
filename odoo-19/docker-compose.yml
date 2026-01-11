@@ -31,7 +31,9 @@ services:
       - "127.0.0.1:8372:8072" 
     volumes:
       - odoo_data:/var/lib/odoo
-      - ./addons:/mnt/extra-addons
+      - /home/tony/Documents/Développement/dev_odoo/19.0/oca:/mnt/extra-addons
+
+#      - ./addons:/mnt/extra-addons
       - ./config/odoo.conf:/etc/odoo/odoo.conf
     networks:
       - odoo_network
