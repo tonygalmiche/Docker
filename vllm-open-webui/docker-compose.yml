@@ -1,0 +1,45 @@
+services:
+
+  # ---------------------------------------------------------------
+  # vLLM - DÉSACTIVÉ
+  # L'image vllm/vllm-openai embarque PyTorch compilé pour CUDA
+  # compute capability >= 7.0 (Volta/Turing+).
+  # La Quadro P1000 (Pascal, sm_61) n'est pas compatible.
+  # Erreur : "CUDA error: no kernel image is available for execution
+  # on the device"
+  # Aucune version officielle de vLLM ne supporte les GPU Pascal.
+  # À réactiver sur un serveur avec un GPU compatible (>= sm_70).
+  # ---------------------------------------------------------------
+  # vllm:
+  #   image: vllm/vllm-openai:latest
+  #   runtime: nvidia
+  #   container_name: vllm-server
+  #   environment:
+  #     - NVIDIA_VISIBLE_DEVICES=all
+  #   volumes:
+  #     - ./data/huggingface:/root/.cache/huggingface
+  #   ports:
+  #     - "8000:8000"
+  #   command: >
+  #     --model Qwen/Qwen2.5-1.5B-Instruct
+  #     --gpu-memory-utilization 0.80
+  #     --max-model-len 2048
+  #     --enforce-eager
+  #     --dtype half
+  #   restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      # Connexion à l'Ollama qui tourne sur la machine hôte (port 11434)
+      - 'OLLAMA_BASE_URL=http://host.docker.internal:11434'
+    extra_hosts:
+      # Permet au conteneur de joindre la machine hôte via host.docker.internal
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # La base de données de l'interface sera dans ./data/webui
+      - ./data/webui:/app/data
+    restart: unless-stopped

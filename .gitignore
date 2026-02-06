@@ -3,6 +3,7 @@ dokuwiki/
 gemini-api/
 addons
 addons/
+data/
 
 # Archives
 *.tgz
