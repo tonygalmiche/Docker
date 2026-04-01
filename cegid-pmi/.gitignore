@@ -1,0 +1,15 @@
+# Dossier backup
+backup/
+
+
+
+# Données sensibles
+*.log
+*.env
+config.sh
+
+# Environnement Python
+.venv/
+
+# Scripts générés
+scripts/*.sql

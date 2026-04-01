@@ -1,0 +1,58 @@
+=== COMMANDES SQL SERVER - AIDE-MÉMOIRE ===
+
+1. CRÉER LA BASE DE DONNÉES
+---------------------------
+CREATE DATABASE CEGID_PMI;
+GO
+
+
+2. LISTER TOUTES LES BASES
+--------------------------
+SELECT name FROM sys.databases;
+GO
+
+
+3. UTILISER UNE BASE
+--------------------
+USE CEGID_PMI;
+GO
+
+
+4. LISTER LES TABLES
+--------------------
+SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES;
+GO
+
+
+5. SUPPRIMER UNE BASE
+---------------------
+DROP DATABASE CEGID_PMI;
+GO
+
+
+6. QUITTER LA CONSOLE
+---------------------
+EXIT
+
+
+=== SCRIPTS DISPONIBLES ===
+
+1. ANALYSER TOUTES LES TABLES
+------------------------------
+./analyze-db.sh
+
+2. ANALYSER UNE TABLE SPÉCIFIQUE
+---------------------------------
+./analyze-table.sh NOM_TABLE
+./analyze-table.sh dbo.ARTICLE
+
+3. CONSOLE SQL SERVER
+---------------------
+./sqlserver-console.sh
+
+4. RESTAURER UNE BASE
+---------------------
+./restore-db.sh fichier.bak NOM_BASE
+
+
+IMPORTANT : N'oubliez pas de taper GO après chaque commande SQL !

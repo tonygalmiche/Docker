@@ -1,0 +1,32 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cegid-pmi-sqlserver
+    hostname: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=VotreMotDePasseF0rt!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./backup:/backup
+      - ./scripts:/scripts
+    networks:
+      - cegid-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P VotreMotDePasseF0rt! -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  cegid-network:
+    driver: bridge

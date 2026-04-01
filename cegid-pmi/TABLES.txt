@@ -1,0 +1,234 @@
+Base de données : CEGID_PMI — 136 tables — 6 680 571 lignes
+Généré le       : 2026-04-01
+================================================================================
+Format : Table | Lignes | Description
+
+================================================================================
+ DONNÉES DE PRODUCTION / STOCK
+================================================================================
+
+dbo.MVTSTO                        | 1 372 081 | Mouvements de stock
+dbo.BESOIN                        |   709 328 | Besoins en composants (MRP/CBN)
+dbo.PRODUCT                       |   333 871 | Lignes de production / fabrication
+dbo.CONSOM                        |   309 806 | Consommations matières
+dbo.STDEPLOT                      |    75 130 | Stock par dépôt/lot
+dbo.HISTINV                       |    33 241 | Historique inventaire
+Stock.Batch                       |    39 354 | Lots (traçabilité)
+dbo.PREPINV                       |       343 | Préparation inventaire
+dbo.MCMVTS                        |         3 | ?
+
+================================================================================
+ COMMANDES CLIENTS
+================================================================================
+
+dbo.ECOMCLI                       |    21 567 | En-tête commandes clients
+dbo.LCOMCLI                       |    62 140 | Lignes commandes clients
+dbo.HISCOM                        |    24 926 | Historique commandes
+dbo.HISCOMH                       |    19 903 | Historique commandes (en-têtes ?)
+dbo.LEXPCLI                       |   169 918 | Lignes expéditions clients
+dbo.EEXPCLI                       |    81 038 | En-tête expéditions clients
+dbo.COLIS                         |   132 804 | Colis expéditions
+dbo.COLISCDE                      |       767 | Colis par commande
+dbo.LOFFCLI                       |        35 | Lignes offres clients
+dbo.EOFFCLI                       |         9 | En-tête offres clients
+dbo.ECOMOUV                       |         3 | En-tête commandes ouvertes
+dbo.LCOMOUV                       |        20 | Lignes commandes ouvertes
+
+================================================================================
+ COMMANDES FOURNISSEURS
+================================================================================
+
+dbo.ECOMFOU                       |    10 462 | En-tête commandes fournisseurs
+dbo.LCOMFOU                       |    15 843 | Lignes commandes fournisseurs
+dbo.ERECFOU                       |    31 148 | En-tête réceptions fournisseurs
+dbo.LRECFOU                       |    57 808 | Lignes réceptions fournisseurs
+dbo.EDDEFOU                       |       126 | En-tête demandes de prix fournisseurs
+dbo.LDDEFOU                       |         ? | Lignes demandes de prix fournisseurs
+dbo.UECOMFOU                      |       479 | Extension en-tête commandes fournisseurs
+dbo.UERECFOU                      |       565 | Extension réceptions fournisseurs
+
+================================================================================
+ FACTURATION
+================================================================================
+
+dbo.PFACCLI                       |   116 556 | Écritures comptables factures clients (3 lignes/facture : TVA, produit, client)
+dbo.PFACFOU                       |   128 135 | Écritures comptables factures fournisseurs (3 lignes/facture : TVA, charge, fournisseur)
+
+================================================================================
+ ARTICLES / NOMENCLATURES
+================================================================================
+
+dbo.ARTICLE                       |    57 463 | Articles (référentiel produits)
+dbo.UARTICLE                      |    11 340 | Extension articles (champs utilisateur)
+dbo.REFEXT                        |    11 590 | Références externes (cross-référence fournisseur/client)
+dbo.REFEXT2                       |     4 172 | Références externes secondaires
+dbo.TECHNIK                       |   128 878 | Nomenclatures techniques (liens parent/composant)
+dbo.TECHNIKC                      |        54 | En-têtes nomenclatures techniques
+dbo.SPECIFC                       |       471 | En-têtes spécifications
+dbo.SPECIF                        |       102 | Spécifications articles
+dbo.MODELE                        |     1 267 | Modèles / gabarits articles
+dbo.TABFORMU                      |    11 041 | Formules de calcul
+dbo.FORMULES                      |       378 | Définition des formules
+
+================================================================================
+ CLIENTS / FOURNISSEURS / TIERS
+================================================================================
+
+dbo.CLIENT                        |     1 217 | Clients
+dbo.UCLIENT                       |        99 | Extension clients (champs utilisateur)
+dbo.FOURNIS                       |       792 | Fournisseurs
+dbo.UFOURNIS                      |        53 | Extension fournisseurs (champs utilisateur)
+dbo.REPRESEN                      |        13 | Représentants / commerciaux
+dbo.TRANSPOR                      |       380 | Transporteurs
+dbo.CONTACT                       |         2 | Contacts
+dbo.CONTACTSequence               |         1 | Séquence contacts
+
+================================================================================
+ GAMMES DE FABRICATION / TRAVAUX
+================================================================================
+
+dbo.ANAL                          |    56 812 | Gammes opératoires (lignes)
+dbo.BANAL                         |    16 978 | En-têtes gammes opératoires
+dbo.FANAL                         |        13 | Familles de gammes
+dbo.RESPDOC                       |    58 971 | Responsables / jalons documents de fabrication
+dbo.TRAVAUX                       |        36 | Travaux / opérations
+dbo.SALARIES                      |       150 | Salariés / opérateurs
+dbo.HORAIRES                      |         7 | Horaires de travail
+dbo.RHPRESPE                      |         3 | Présences spéciales RH
+Production.BomRange               |   224 714 | Gammes (table Production)
+Production.WorkstationMachine     |       341 | Machines par poste de charge
+Production.IdCONTROLE             |        10 | Identifiants contrôle production
+
+================================================================================
+ TRAÇABILITÉ / SUIVI
+================================================================================
+
+dbo.TRACAB                        |   927 055 | Traçabilité des opérations (log général)
+dbo.ACTITRAC                      |    27 834 | Activités de traçabilité
+dbo.TEMPAS                        |   605 323 | Temps passés / pointages
+dbo.HISTINV                       |    33 241 | Historique inventaire
+dbo.COMMFICH                      |    10 300 | Commentaires / fichiers attachés
+dbo.DESCFICH                      |     9 507 | Descriptions fichiers attachés
+dbo.FICPAR                        |     9 764 | Fichiers paramètres
+dbo.FICPAC                        |       530 | Fichiers pack
+dbo.NONCONFO                      |        80 | Non-conformités / qualité
+
+================================================================================
+ COMPTABILITÉ / ANALYTIQUE
+================================================================================
+
+dbo.LIBANA                        |       916 | Libellés analytiques
+dbo.ANAL (aussi analytique)       |    56 812 | (voir Gammes)
+dbo.BUDCPTA                       |       141 | Budget comptable
+dbo.JOURNA                        |        78 | Journaux comptables
+dbo.VALCTRE                       |        17 | Valeurs comptables
+dbo.VALCTRL                       |         3 | Valeurs de contrôle
+dbo.ENCOURS                       |         1 | Encours production
+dbo.PREVECL                       |         1 | Prévisions éclatées
+dbo.PREVIS                        |         1 | Prévisions
+dbo.PREVITRE                      |         2 | Prévisions treillis ?
+
+================================================================================
+ STATISTIQUES / CUMULS
+================================================================================
+
+dbo.Q1CUMDEP                      |     4 547 | Cumuls dépenses Q1
+dbo.Q1CUMQTE                      |     3 890 | Cumuls quantités Q1
+dbo.STACUM01                      |       356 | Statistiques cumulées
+dbo.STADET01                      |     3 052 | Statistiques détaillées
+dbo.PCSOLD                        |     3 149 | Prix de vente soldés / historique prix
+dbo.PCSAN                         |     3 370 | Prix de vente annuels
+dbo.PCSANH                        |     2 050 | Historique prix de vente annuels
+dbo.PCSANA                        |       196 | Prix de vente analytiques
+dbo.PCONFIGU                      |     4 590 | Prix configuration
+
+================================================================================
+ PARAMÉTRAGE / CONFIGURATION
+================================================================================
+
+dbo.PARAM                         |     6 397 | Paramètres généraux
+dbo.GENPAR                        |     6 113 | Paramètres génériques
+dbo.PPARAM                        |       530 | Paramètres personnalisés
+dbo.PARAMH                        |        20 | Historique paramètres
+dbo.PARAMSYS                      |         1 | Paramètres système
+dbo.DETABLES                      |        13 | Description des tables (dictionnaire)
+dbo.DICTIO                        |        62 | Dictionnaire de données
+dbo.DECHAMPS                      |       164 | Description des champs
+dbo.TABLARCH                      |        32 | Tables d'archivage
+dbo.TABLETTE                      |        42 | Paramètres tablette / mobile
+dbo.UMENU                         |     5 080 | Menus utilisateur
+dbo.WEBFEN                        |        35 | Fenêtres web / interface
+dbo.WEBPROFI                      |         9 | Profils web
+dbo.WEBUTIL                       |         1 | Utilisateurs web
+dbo.WEBMDP                        |     2 304 | Mots de passe web
+dbo.UPARAFEN                      |    28 379 | Paramètres fenêtres utilisateur
+dbo.PCHEMINS                      |     2 798 | Chemins fichiers
+dbo.OLDLIBELLE                    |     1 274 | Anciens libellés (migration)
+dbo.LIBEL40                       |    63 634 | Libellés 40 caractères (traductions)
+
+================================================================================
+ UTILISATEURS / SÉCURITÉ
+================================================================================
+
+dbo.UTILISAT                      |        58 | Utilisateurs
+dbo.USERGRP                       |         9 | Groupes d'utilisateurs
+
+================================================================================
+ TARIFS / REMISES
+================================================================================
+
+dbo.TARIF                         |        64 | Tarifs
+dbo.TRANCHES                      |         8 | Tranches de remise/tarif
+dbo.CANAL                         |         5 | Canaux de vente
+
+================================================================================
+ TABLES TECHNIQUES / SYSTÈME
+================================================================================
+
+Common.MissingSequences           |   259 427 | Séquences manquantes (gestion IDs)
+Common.RtfDocumentLineDescription |   244 850 | Descriptions RTF lignes documents
+Common.RtfComment                 |    73 286 | Commentaires RTF
+Common.RtfItemDescription         |    22 590 | Descriptions RTF articles
+Common.CalendarGeneral            |     9 496 | Calendrier général
+Common.CalendarResources          |       119 | Calendrier ressources
+Cache.DomainDetail                |        79 | Cache domaines
+Cache.CacheInvalidation           |        18 | Invalidation cache
+dbo.__MigrationHistory            |        45 | Historique migrations EF
+dbo.MESSAGLI                      |       469 | Messages lignes
+dbo.MESSAGAC                      |       462 | Messages actions
+dbo.AFFAIREN                      |         1 | Affaires (numérotation ?)
+dbo.ECHEMULT                      |       493 | Échéances multiples
+dbo.COOBAN                        |        32 | ?
+dbo.COOLCR                        |         8 | ?
+dbo.SIMULA                        |         3 | Simulations
+dbo.MOYCTRL                       |         3 | Moyens de contrôle
+dbo.ENVOI                         |         1 | Envois (emails / EDI ?)
+dbo.PROSPOLD                      |         3 | Prospects (ancienne version ?)
+Crm.GdprRequests                  |         1 | Demandes RGPD
+Crm.GdprTraceability              |         1 | Traçabilité RGPD
+
+
+
+
+================================================================================
+ NOTES SUR LA STRUCTURE
+================================================================================
+
+PFACCLI / PFACFOU — Journal comptable des factures
+---------------------------------------------------
+Ces tables ne contiennent PAS de lignes article. Chaque facture génère exactement
+3 écritures comptables, identifiées par PFCTCARTE :
+
+  PFKTFACTUR  = numéro de facture (clé)
+  PFKNIND     = numéro d'ordre de l'écriture (1, 2, 3)
+  PFCTCARTE   = type d'écriture :
+                  A = ligne client/fournisseur TTC  (débit, PFCTSENS=D)
+                  B = ligne TVA collectée/déductible (crédit, PFCTSENS=C)
+                  C = ligne produit HT / charge HT  (crédit, PFCTSENS=C)
+  PFITCPT     = numéro de compte comptable (411x client, 401x fourn., 4457x TVA, 7xxx produit, 6xxx charge)
+  PFCNMHT     = montant HT (renseigné uniquement sur la ligne A)
+  PFCNMTVA    = montant TVA (renseigné uniquement sur la ligne A)
+  PFCNMT      = montant de l'écriture
+
+Les lignes article commerciales des factures clients sont dans LEXPCLI (expéditions)
+ou LCOMCLI (commandes). Il n'existe pas de table LFACCLI / LFACFOU.

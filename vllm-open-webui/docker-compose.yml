@@ -42,4 +42,4 @@ services:
     volumes:
       # La base de données de l'interface sera dans ./data/webui
       - ./data/webui:/app/data
-    restart: unless-stopped
+  #  restart: unless-stopped
