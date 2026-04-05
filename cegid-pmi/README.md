@@ -75,37 +75,13 @@ Une fois restaurée, vous pouvez vous connecter à la base avec :
 
 **Depuis l'hôte avec sqlcmd :**
 ```bash
-docker exec -it cegid-pmi-sqlserver /opt/mssql-tools/bin/sqlcmd \
-  -S localhost -U sa -P 'VotreMotDePasseF0rt!'
+./sqlserver-console.sh
 ```
 
-**Connection string pour applications :**
-```
-Server=localhost,1433;Database=CEGID_PMI;User Id=sa;Password=VotreMotDePasseF0rt!;TrustServerCertificate=True;
-```
 
 ## 🛠️ Commandes utiles
 
-### Lister les bases de données
-```bash
-docker exec -it cegid-pmi-sqlserver /opt/mssql-tools/bin/sqlcmd \
-  -S localhost -U sa -P 'VotreMotDePasseF0rt!' \
-  -Q "SELECT name FROM sys.databases"
-```
 
-### Voir les tables d'une base
-```bash
-docker exec -it cegid-pmi-sqlserver /opt/mssql-tools/bin/sqlcmd \
-  -S localhost -U sa -P 'VotreMotDePasseF0rt!' -d CEGID_PMI \
-  -Q "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'"
-```
-
-### Créer une sauvegarde
-```bash
-docker exec -it cegid-pmi-sqlserver /opt/mssql-tools/bin/sqlcmd \
-  -S localhost -U sa -P 'VotreMotDePasseF0rt!' \
-  -Q "BACKUP DATABASE [CEGID_PMI] TO DISK='/backup/cegid_pmi_$(date +%Y%m%d).bak'"
-```
 
 ### Arrêter le conteneur
 ```bash
@@ -121,8 +97,8 @@ docker-compose down -v
 
 ```
 cegid-pmi/
-├── docker-compose.yml      # Configuration Docker
-├── restore-db.sh           # Script de restauration
+├── docker-compose.yml     # Configuration Docker
+├── restore-db.sh          # Script de restauration
 ├── README.md              # Ce fichier
 ├── backup/                # Placez vos fichiers .bak ici
 └── scripts/               # Scripts SQL personnalisés (optionnel)
