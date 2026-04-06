@@ -7,6 +7,11 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=VotreMotDePasseF0rt!
       - MSSQL_PID=Express
+      - MSSQL_MEMORY_LIMIT_MB=32768
+    deploy:
+      resources:
+        limits:
+          memory: 40g
     ports:
       - "1433:1433"
     volumes:

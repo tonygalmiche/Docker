@@ -13,8 +13,12 @@ L'analyse combine deux critères :
 CHAMPS_A_ANONYMISER du fichier anonymize-names.py.
 
 Usage:
-  ./discover-names-fields.py           → analyse toute la base
-  ./discover-names-fields.py --verbose → affiche aussi les échantillons
+  ./discover-names-fields.py                      → analyse toute la base
+  ./discover-names-fields.py --verbose             → affiche aussi les échantillons
+  ./discover-names-fields.py --type ville          → filtre sur le type 'ville'
+  ./discover-names-fields.py --type personne       → filtre sur le type 'personne'
+
+Types reconnus : prenom, personne, entreprise, ville, telephone, ambigu
 """
 
 import sys
@@ -51,6 +55,11 @@ DB_NAME     = _cfg.get("DB_NAME", "")
 # ──────────────────────────────────────────────────────────────────────────────
 
 VERBOSE = "--verbose" in sys.argv
+DEBUG   = "--debug"   in sys.argv
+
+# Filtre optionnel sur le type de champ (--type <type>)
+_type_idx = sys.argv.index("--type") if "--type" in sys.argv else -1
+TYPE_FILTER: str | None = sys.argv[_type_idx + 1].lower() if _type_idx != -1 and _type_idx + 1 < len(sys.argv) else None
 
 # ── Mots-clés dans les noms de colonnes ───────────────────────────────────────
 # Chaque entrée : (regex_sur_nom_colonne, type_par_defaut)
@@ -60,8 +69,12 @@ KEYWORDS_ENTREPRISE = re.compile(
     r'COMPAGN|CABINET|ASSOCIA|GROUPE)',
     re.IGNORECASE,
 )
-KEYWORDS_PRENOM = re.compile(r'(PRENOM|FIRSTNAME)', re.IGNORECASE)
-KEYWORDS_VILLE  = re.compile(r'(VILLE|LOCALITE|LOCALITÉ|CITY)', re.IGNORECASE)
+KEYWORDS_PRENOM     = re.compile(r'(PRENOM|FIRSTNAME)', re.IGNORECASE)
+KEYWORDS_VILLE      = re.compile(r'(VILLE|LOCALITE|LOCALITÉ|CITY)', re.IGNORECASE)
+KEYWORDS_TELEPHONE  = re.compile(
+    r'(TEL|MOBILE|GSM|FAX|PORTABLE|CELLULAIRE)',
+    re.IGNORECASE,
+)
 KEYWORDS_PERSONNE = re.compile(
     r'(LASTNAME|SALARI|EMPLOYE|CONTACT|INTERLO)',
     re.IGNORECASE,
@@ -112,6 +125,8 @@ def candidate_type(col_name: str) -> str | None:
         return "prenom"
     if KEYWORDS_VILLE.search(col_name):
         return "ville"
+    if KEYWORDS_TELEPHONE.search(col_name):
+        return "telephone"
     if KEYWORDS_PERSONNE.search(col_name):
         return "personne"
     if KEYWORDS_ENTREPRISE.search(col_name):
@@ -201,7 +216,24 @@ def main():
     all_cols = get_text_columns(conn)
     print(f"  {len(all_cols)} colonnes textuelles trouvées\n")
 
-    # Regroupé par table : { "schema.TABLE": [ (colonne, type) ] }
+    # ── Mode direct pour --type telephone ────────────────────────────────────
+    if TYPE_FILTER == "telephone":
+        tel_cols = [
+            (schema, table, col)
+            for schema, table, col in all_cols
+            if candidate_type(col) == "telephone"
+        ]
+        print(f"  {len(tel_cols)} colonne(s) téléphone détectée(s)\n")
+        print("=" * 70)
+        print("  COLONNES TÉLÉPHONE")
+        print("=" * 70)
+        for schema, table, col in tel_cols:
+            table_full = f"{schema}.{table}"
+            values = fetch_col_preview(conn, schema, table, col, n=10)
+            print_col_table(table_full, col, "telephone", values)
+        conn.close()
+        return
+
     results: dict[str, list[tuple[str, str]]] = defaultdict(list)
     # Mémoriser (schema, table) pour la prévisualisation
     table_coords: dict[str, tuple[str, str]] = {}
@@ -215,10 +247,14 @@ def main():
         hint = candidate_type(col)
         if hint is None:
             continue
+        if DEBUG:
+            print(f"[DEBUG] candidat : {table_full}.{col}  hint={hint}")
 
         # Ignorer les tables vides (vérification une seule fois par table)
         if table_full != prev_table:
             if not table_has_rows(conn, schema, table):
+                if DEBUG:
+                    print(f"[DEBUG]   → table vide, ignorée")
                 skipped_empty += 1
                 prev_table = table_full
                 continue
@@ -227,23 +263,32 @@ def main():
         # Échantillonnage
         values = sample_values(conn, schema, table, col)
         if not values:
+            if DEBUG:
+                print(f"[DEBUG]   → aucune valeur, ignoré")
             continue
 
         # Ignorer les colonnes dont les valeurs ressemblent à des codes courts
-        # (numériques, ou < 6 caractères sans espace)
-        looks_like_codes = all(
+        # (sauf pour le type telephone où des formats courts sont normaux)
+        looks_like_codes = hint != "telephone" and all(
             len(v) < 6 and ' ' not in v
             for v in values
         )
         if looks_like_codes:
+            if DEBUG:
+                print(f"[DEBUG]   → ressemble à des codes courts, ignoré: {values[:3]}")
             continue
 
         final_type = refine_type(col, values, hint)
+        if DEBUG:
+            print(f"[DEBUG]   → final_type={final_type}  valeurs={values[:3]}")
 
         if VERBOSE:
             print(f"  {table_full}.{col}  →  {final_type}")
             for v in values[:3]:
                 print(f"      {v!r}")
+
+        if TYPE_FILTER and final_type != TYPE_FILTER:
+            continue
 
         results[table_full].append((col, final_type))
         table_coords[table_full] = (schema, table)

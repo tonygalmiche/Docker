@@ -49,22 +49,12 @@ CHAMPS_A_ANONYMISER = [
     ("dbo.CLIENT",    "CLCTNOM",    "entreprise"),
     ("dbo.CLIENT",    "CLCTNOMLIV", "entreprise"),
     ("dbo.CLIENT",    "CLCTNOMBAN", "entreprise"),
-    ("dbo.CLIENT", "CLCTVILLE", "ville"),
-
-
-
-
-
     ("dbo.CONTACT",   "CTCTNOM",    "entreprise"),
     ("dbo.CONTACT",   "CTCTPRENOM", "prenom"),
     ("dbo.COOBAN",    "CBCTNOMBAN", "entreprise"),
     ("dbo.COOLCR",    "CRCTNOMBAN", "entreprise"),
     ("dbo.ECHEMULT",  "EMCTNOM",    "entreprise"),
     ("dbo.ECOMCLI",   "ECCTNOM",    "entreprise"),
-
-
-
-
     #("dbo.ECOMCLI",   "ECCTNOMLIV", "entreprise"),
     ("dbo.ECOMFOU",   "ECCTNOM",    "entreprise"),
     #("dbo.ECOMFOU",   "ECCTNOMLIV", "entreprise"),
@@ -90,6 +80,22 @@ CHAMPS_A_ANONYMISER = [
     ("dbo.REPRESEN",  "RECTNOM",    "entreprise"),
     ("dbo.SALARIES",  "MACTNOM",    "personne"),
     ("dbo.UTILISAT",  "UTCTNOM",    "personne"),
+
+
+    ("dbo.CLIENT", "CLCTVILLE", "ville"),
+    ("dbo.ECOMCLI", "ECCTVILLE", "ville"),
+    ("dbo.ECOMFOU", "ECCTVILLE", "ville"),
+    ("dbo.EDDEFOU", "ECCTVILLE", "ville"),
+    ("dbo.EEXPCLI", "ECCTVILLE", "ville"),
+    ("dbo.EOFFCLI", "ECCTVILLE", "ville"),
+    ("dbo.ERECFOU", "ECCTVILLE", "ville"),
+    ("dbo.FOURNIS", "CLCTVILLE", "ville"),
+    ("dbo.NONCONFO", "NCCTVILLE", "ville"),
+    ("dbo.SALARIES", "MACTVILLE", "ville"),
+    ("dbo.TRANSPOR", "TOCTNOMLOC", "ville"),
+
+
+
 ]
 
 
@@ -190,9 +196,8 @@ def run_sql_update(query: str, db: str = DB_NAME) -> int:
 def run_sql_update_par_ligne(table_full: str, colonne: str, noms: list[str],
                               db: str = DB_NAME) -> int:
     """
-    Récupère le physloc de chaque ligne, envoie un UPDATE par ligne via stdin.
+    Récupère le physloc de chaque ligne, envoie les UPDATE par petits lots via stdin.
     """
-    # Récupérer les adresses physiques des lignes à mettre à jour
     rows = run_sql(f"""
         SELECT CONVERT(varchar(20), %%physloc%%, 1) AS LOC
         FROM {table_full}
@@ -210,20 +215,23 @@ def run_sql_update_par_ligne(table_full: str, colonne: str, noms: list[str],
             f"UPDATE {table_full} SET {colonne} = N'{nom_esc}' WHERE %%physloc%% = {loc}"
         )
 
-    script = "\n".join(lines)
-    cmd = [
-        "docker", "exec", "-i", CONTAINER,
-        SQLCMD,
-        "-S", DB_HOST, "-U", DB_USER, "-P", DB_PASS,
-        "-d", db, "-C", "-h", "-1",
-    ]
-    result = subprocess.run(cmd, input=script, capture_output=True, text=True)
-
+    # Découper en lots pour éviter RESOURCE_SEMAPHORE_QUERY_COMPILE
+    BATCH_SIZE = 500
     total = 0
-    for line in result.stdout.splitlines():
-        m = re.search(r'\((\d+) rows? affected\)', line.strip(), re.IGNORECASE)
-        if m:
-            total += int(m.group(1))
+    for i in range(0, len(lines), BATCH_SIZE):
+        batch = lines[i:i + BATCH_SIZE]
+        script = "\n".join(batch)
+        cmd = [
+            "docker", "exec", "-i", CONTAINER,
+            SQLCMD,
+            "-S", DB_HOST, "-U", DB_USER, "-P", DB_PASS,
+            "-d", db, "-C", "-h", "-1",
+        ]
+        result = subprocess.run(cmd, input=script, capture_output=True, text=True)
+        for line in result.stdout.splitlines():
+            m = re.search(r'\((\d+) rows? affected\)', line.strip(), re.IGNORECASE)
+            if m:
+                total += int(m.group(1))
     return total
 
 
@@ -301,6 +309,17 @@ def traiter_champ(table_full: str, colonne: str, type_champ: str, apply: bool) -
     return "\n".join(lignes), nb_updates
 
 
+def traiter_table(table_full: str, champs: list[tuple[str, str]], apply: bool) -> tuple[str, int]:
+    """Traite tous les champs d'une table séquentiellement (évite les verrous)."""
+    lignes = []
+    total = 0
+    for colonne, type_champ in champs:
+        output, nb = traiter_champ(table_full, colonne, type_champ, apply)
+        lignes.append(output)
+        total += nb
+    return "\n".join(lignes), total
+
+
 def main():
     apply = "--apply" in sys.argv
 
@@ -309,10 +328,16 @@ def main():
 
     total_updates = 0
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
+    # Regrouper les champs par table pour éviter les verrous entre threads
+    from collections import defaultdict
+    par_table: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    for table_full, colonne, type_champ in CHAMPS_A_ANONYMISER:
+        par_table[table_full].append((colonne, type_champ))
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
         futures = {
-            executor.submit(traiter_champ, table_full, colonne, type_champ, apply): (table_full, colonne)
-            for table_full, colonne, type_champ in CHAMPS_A_ANONYMISER
+            executor.submit(traiter_table, table_full, champs, apply): table_full
+            for table_full, champs in par_table.items()
         }
         for future in concurrent.futures.as_completed(futures):
             output, nb = future.result()

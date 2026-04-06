@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
-Analyse une table SQL Server :
+Analyse une ou plusieurs tables SQL Server :
   - Nombre de valeurs distinctes par colonne (triées décroissant)
   - Index et clés (PRIMARY KEY, UNIQUE)
 
-Usage: .venv/bin/python analyze-table.py NOM_TABLE
+Usage:
+  .venv/bin/python analyze-table.py NOM_TABLE   → analyse une table
+  .venv/bin/python analyze-table.py             → analyse toutes les tables
 """
 
 import sys
@@ -154,14 +156,18 @@ def fmt_table(headers: list[str], rows: list[tuple], right_align: set[int] = set
     print(sep)
 
 
-def main() -> None:
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} NOM_TABLE")
-        sys.exit(1)
+def get_all_tables(conn) -> list[tuple[str, str]]:
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT TABLE_SCHEMA, TABLE_NAME
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_TYPE = 'BASE TABLE'
+        ORDER BY TABLE_SCHEMA, TABLE_NAME
+    """)
+    return cur.fetchall()
 
-    conn = get_connection()
-    schema, table = resolve_table(conn, sys.argv[1])
 
+def analyze_table(conn, schema: str, table: str) -> None:
     print(f"\n{'═' * 60}")
     print(f"  Table : [{schema}].[{table}]  —  {DB_NAME}")
     print(f"{'═' * 60}\n")
@@ -169,7 +175,6 @@ def main() -> None:
     total = count_total(conn, schema, table)
     print(f"Nombre total de lignes : {total:,}\n")
 
-    # ── Analyse des colonnes ──────────────────────────────────────
     print("── Colonnes (triées par valeurs distinctes décroissantes) ──\n")
     col_info = get_column_info(conn, schema, table)
 
@@ -195,10 +200,8 @@ def main() -> None:
         right_align={3, 4},
     )
 
-    # ── Index et clés ─────────────────────────────────────────────
     print("\n── Index et clés ──\n")
     idx_rows = get_indexes(conn, schema, table)
-    conn.close()
 
     if not idx_rows:
         print("  (aucun index / clé trouvé)")
@@ -217,6 +220,25 @@ def main() -> None:
         )
 
     print()
+
+
+def main() -> None:
+    conn = get_connection()
+
+    if len(sys.argv) >= 2:
+        schema, table = resolve_table(conn, sys.argv[1])
+        analyze_table(conn, schema, table)
+    else:
+        tables = get_all_tables(conn)
+        print(f"{len(tables)} tables trouvées dans {DB_NAME}\n")
+        for i, (schema, table) in enumerate(tables, 1):
+            print(f"[{i}/{len(tables)}] {schema}.{table}")
+            try:
+                analyze_table(conn, schema, table)
+            except Exception as e:
+                print(f"  ⚠ Erreur : {e}\n")
+
+    conn.close()
 
 
 if __name__ == "__main__":
