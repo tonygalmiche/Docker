@@ -73,3 +73,11 @@ CROSS APPLY sys.dm_exec_sql_text(r.sql_handle) t
 WHERE r.session_id > 50
 ORDER BY r.total_elapsed_time DESC
 "
+
+
+sqlcmd -Q "UPDATE dbo.MVTSTO SET MVCTNOMUTI = N'Gabrielle NICOLAS'"
+(1372081 rows affected)
+
+
+
+sqlcmd -Q "SELECT COUNT(*) FROM dbo.ECOMCLI"
