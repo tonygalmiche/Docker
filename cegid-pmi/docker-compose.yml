@@ -20,7 +20,10 @@ services:
       - ./scripts:/scripts
     networks:
       - cegid-network
-    restart: unless-stopped
+
+
+    #Le conteneur ne redémarrera plus automatiquement, ni au reboot du host, ni en cas d'erreur.
+    restart: "no"
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P VotreMotDePasseF0rt! -Q 'SELECT 1' || exit 1"]
       interval: 10s
