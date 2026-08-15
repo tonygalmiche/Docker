@@ -1,0 +1,16 @@
+services:
+  vulnx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vulnx:local
+    container_name: vulnx
+    stdin_open: true
+    tty: true
+    environment:
+      - PDCP_API_KEY=${PDCP_API_KEY:-}
+    volumes:
+      - ./output:/output
+    # 1. Construction : docker compose build
+    # 2. Utilisation  : docker compose run --rm vulnx search mongodb
+    # Clé API gratuite : https://cloud.projectdiscovery.io/
